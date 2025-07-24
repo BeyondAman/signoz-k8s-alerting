@@ -38,6 +38,7 @@ signoz-k8s-alerting/
 │   ├── pending-pod.png
 │   ├── alert-query.png
 │   └── slack-alert.png
+│   └── setup.png
 └── README.md
 ```
 
@@ -82,7 +83,7 @@ kubectl apply -f otel/otel-collector-deployment.yaml
 
 ## 📊 Visualize Metrics in SigNoz
 
-1. Open [https://signoz.cloud](https://signoz.cloud)
+1. Open [Sample Dashboard](https://svey-5nsw.in.signoz.cloud/dashboard/01983dbc-cb7a-7895-b491-92d32eb449b2?relativeTime=30m)
 2. Create dashboard or use Explorer
 3. Query `k8s.pod.phase` filtered by `Pending`
 

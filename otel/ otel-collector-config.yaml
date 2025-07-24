@@ -1,0 +1,80 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: otel-collector-config
+  namespace: opentelemetry
+  labels:
+    app: otel-collector
+data:
+  config.yaml: |
+    receivers:
+        receiver_creator:
+          watch_observers: [k8s_observer]
+          discovery:
+            enabled: true
+          receivers:
+            kubeletstats:
+              rule: type == "k8s.node"
+              config:
+                auth_type: serviceAccount
+                insecure_skip_verify: true
+                collection_interval: 10s
+                endpoint: "`endpoint`:`kubelet_endpoint_port`"
+                extra_metadata_labels:
+                  - container.id
+                metric_groups:
+                  - container
+                  - pod
+                  - node
+        k8s_cluster:
+          auth_type: serviceAccount
+          collection_interval: 30s
+
+    exporters:
+      otlp:
+        endpoint: "https://ingest.in.signoz.cloud:443"
+        headers:
+          signoz-access-token: "p6xJUT5RDdmNhAQCz5z7dfedJRfWh0TRF7xJ"
+        tls:
+          insecure: true
+      debug: {}
+
+    extensions:
+      k8s_observer:
+        auth_type: serviceAccount
+        observe_pods: true
+        observe_nodes: true
+        observe_services: true
+        observe_ingresses: false
+
+
+    service:
+      extensions: [k8s_observer]
+      pipelines:
+        metrics:
+          receivers: [receiver_creator, k8s_cluster]
+          exporters: [otlp]
+          processors: [k8sattributes, resource/add_cluster_name]
+
+
+    processors:
+      k8sattributes:
+        passthrough: false
+        extract:
+          metadata:
+            - k8s.pod.name
+            - k8s.namespace.name
+            - k8s.node.name
+            - k8s.pod.uid
+
+      resource/add_cluster_name:
+        attributes:
+          - key: k8s.cluster.name
+            value: beyond
+            action: upsert
+
+
+
+
+
+

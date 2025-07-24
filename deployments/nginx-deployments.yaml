@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-stable
+  namespace: signoz
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx-stable
+  template:
+    metadata:
+      labels:
+        app: nginx-stable
+      annotations:
+        signoz.test/scrape: "true"
+    spec:
+      containers:
+        - name: nginx
+          image: nginx
+          ports:
+            - containerPort: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-pending
+  namespace: signoz
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx-pending
+  template:
+    metadata:
+      labels:
+        app: nginx-pending
+      annotations:
+        signoz.test/scrape: "true"
+    spec:
+      nodeSelector:
+        non-existent-label: "beyond"  # forces pod into Pending state
+      containers:
+        - name: nginx
+          image: nginx
+          ports:
+            - containerPort: 80
